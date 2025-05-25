@@ -1,8 +1,8 @@
-# frozen_string_literal: true
-
-require_relative "symbolic_differentiator/version"
+require_relative 'symbolic_differentiator/version'
+require_relative 'symbolic_differentiator/differentiator'
 
 module SymbolicDifferentiator
-  class Error < StandardError; end
-  # Your code goes here...
+  def self.differentiate(expression, variable)
+    PolynomialDifferentiator.differentiate(expression, variable)
+  end
 end

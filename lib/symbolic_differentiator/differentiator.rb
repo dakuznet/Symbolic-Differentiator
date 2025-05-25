@@ -52,38 +52,51 @@ module SymbolicDifferentiator
 
       def self.differentiate_term(term_info, var)
         return nil unless term_info[:variables].key?(var)
-      
+  
         new_coeff = term_info[:coefficient] * term_info[:variables][var]
         new_vars = term_info[:variables].dup
         new_vars[var] > 1 ? new_vars[var] -= 1 : new_vars.delete(var)
-      
-        { coefficient: new_coeff, variables: new_vars }
+  
+        new_vars.empty? ? { coefficient: new_coeff, variables: {} } : { coefficient: new_coeff, variables: new_vars }
       end
   
       def self.term_to_s(term)
         return '' if term[:coefficient] == 0
-      
-        parts = []
+  
         coeff = term[:coefficient]
-        int_coeff = coeff.to_i
-        display_coeff = (coeff == int_coeff) ? int_coeff : coeff.round(2)
-      
-        parts << display_coeff unless display_coeff == 1 && !term[:variables].empty?
-        parts << '-' if display_coeff == -1 && !term[:variables].empty?
-      
-        term[:variables].sort.each do |var, exp|
-          part = var.to_s
-          part += "^#{exp}" if exp > 1
-          parts << part
-        end
-      
-        str = parts.join('*')
-        str.sub(/^-/, '') + (str.start_with?('-') ? " - #{str[1..-1]}" : '')
+        vars = term[:variables]
+  
+        display_coeff = if coeff == 1 && !vars.empty?
+                          nil
+                        elsif coeff == -1 && !vars.empty?
+                          '-'
+                        else
+                          coeff.to_i == coeff ? coeff.to_i : coeff.round(2)
+                        end
+  
+        var_str = vars.sort.map do |var, exp|
+          exp > 1 ? "#{var}^#{exp}" : var
+        end.join('*')
+  
+        parts = [display_coeff, var_str].compact
+        return '0' if parts.empty?
+        parts.join('*').gsub(/\*+$/, '')
       end
 
       def self.combine_terms(terms)
-        return '0' if terms.empty?
-        terms.join('+').gsub('+-', '-').sub(/^\+/, '')
+        grouped = Hash.new(0)
+        terms.each do |term_str|
+          term = parse_term(term_str)
+          key = term[:variables]
+          grouped[key] += term[:coefficient]
+        end
+  
+        combined = grouped.each_with_object([]) do |(vars, coeff), arr|
+          next if coeff.zero?
+          arr << term_to_s({ coefficient: coeff, variables: vars })
+        end
+  
+        combined.empty? ? '0' : combined.join('+').gsub('+-', '-')
       end
 
     end

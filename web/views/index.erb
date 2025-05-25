@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Differentiator</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Символьное дифференцирование</h1>
+    
+    <form method="post" action="/differentiate">
+      <div class="form-group">
+        <label>Полином:</label>
+        <input type="text" name="expression" value="<%= @expression %>" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Переменная:</label>
+        <input type="text" name="variable" value="<%= @variable %>" maxlength="1" required>
+      </div>
+      
+      <button type="submit">Дифференцировать</button>
+    </form>
+
+    <% if @result %>
+      <div class="result">
+        <h3>Результат:</h3>
+        <code><%= @result %></code>
+      </div>
+    <% end %>
+
+    <% if @error %>
+      <div class="error">
+        <%= @error %>
+      </div>
+    <% end %>
+  </div>
+</body>
+</html>

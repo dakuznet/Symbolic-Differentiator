@@ -48,6 +48,17 @@ module SymbolicDifferentiator
       
         { coefficient: coefficient * sign, variables: variables }
       end
+
+
+      def self.differentiate_term(term_info, var)
+        return nil unless term_info[:variables].key?(var)
+      
+        new_coeff = term_info[:coefficient] * term_info[:variables][var]
+        new_vars = term_info[:variables].dup
+        new_vars[var] > 1 ? new_vars[var] -= 1 : new_vars.delete(var)
+      
+        { coefficient: new_coeff, variables: new_vars }
+      end
   
       def self.term_to_s(term)
         return '' if term[:coefficient] == 0
@@ -69,5 +80,11 @@ module SymbolicDifferentiator
         str = parts.join('*')
         str.sub(/^-/, '') + (str.start_with?('-') ? " - #{str[1..-1]}" : '')
       end
+
+      def self.combine_terms(terms)
+        return '0' if terms.empty?
+        terms.join('+').gsub('+-', '-').sub(/^\+/, '')
+      end
+
     end
   end
